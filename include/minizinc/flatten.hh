@@ -71,7 +71,7 @@ struct FlatteningOptions {
         collectMznPaths(false),
         recordDomainChanges(false),
         onlyRangeDomains(false),
-        enableHalfReification(true),
+        enableHalfReification(false),
         outputMode(OUTPUT_ITEM),
         outputObjective(false),
         outputOutputItem(false),

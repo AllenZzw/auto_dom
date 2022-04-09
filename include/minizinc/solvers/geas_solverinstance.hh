@@ -17,6 +17,35 @@
 #include <geas/solver/solver.h>
 
 namespace MiniZinc {
+enum Monotonicity { VAR_NONE, VAR_INC, VAR_DEC, VAR_EQL };
+
+typedef void (*analyzer)(SolverInstanceBase&, Call* call);
+class Preprocessor {
+protected:
+  ManagedASTStringMap<analyzer> _preprocessor;
+  SolverInstanceBase& _base;
+
+public:
+  Preprocessor(SolverInstanceBase& base) : _base(base) {}
+  void add(ASTString name, analyzer p);
+  void add(const std::string& name, analyzer p);
+  void post(Call* c);
+  void cleanup() { _preprocessor.clear(); }
+};
+
+typedef void (*dominator)(SolverInstanceBase&, const Call* call, const std::unordered_set<Id*>& fixedVars);
+class DomPoster {
+protected:
+  ManagedASTStringMap<dominator> _domposter;
+  SolverInstanceBase& _base;
+
+public:
+  DomPoster(SolverInstanceBase& base) : _base(base) {}
+  void add(ASTString name, dominator p);
+  void add(const std::string& name, dominator p);
+  void post(Call* c, const std::unordered_set<Id*>& fixedVars);
+  void cleanup() { _domposter.clear(); }
+};
 
 class GeasOptions : public SolverInstanceBase::Options {
 public:
@@ -27,6 +56,8 @@ public:
   int objProbeLimit = 0;
   bool statistics = false;
   std::chrono::milliseconds time = std::chrono::milliseconds(0);
+  int minNogoodLength = 2; 
+  int maxNogoodLength = 2; 
 };
 
 class GeasVariable {
@@ -80,40 +111,68 @@ public:
   GeasSolverInstance(Env& env, std::ostream& log, SolverInstanceBase::Options* opt);
   ~GeasSolverInstance() override = default;
   void processFlatZinc() override;
-  geas::solver_data* solverData() const { return _solver.data; }
-  geas::solver& solver() { return _solver; }
+  geas::solver_data* solverData() const { return _domsolver->data; }
+  geas::solver& solver() { return *_domsolver; }
 
   Status solve() override;
+
   Status next() override { return SolverInstance::ERROR; }  // TODO: Implement
-  void resetSolver() override;
+  void resetSolver() override; // assert(false)
+  Expression* getSolutionValue(Id* id) override; // assert(false)
+  void printStatistics() override; // assert(false)
 
-  Expression* getSolutionValue(Id* id) override;
-  void printStatistics() override;
-
-  // MiniZinc to Geas conversions
+  // MiniZinc to value conversions for posting constraints 
   bool asBool(Expression* e) { return eval_bool(env().envi(), e); }
   vec<bool> asBool(ArrayLit* al);
-  geas::patom_t asBoolVar(Expression* e);
-  vec<geas::patom_t> asBoolVar(ArrayLit* al);
-  vec<int> asInt(ArrayLit* al);
   int asInt(Expression* e) { return static_cast<int>(eval_int(env().envi(), e).toInt()); }
-  geas::intvar asIntVar(Expression* e);
-  vec<geas::intvar> asIntVar(ArrayLit* al);
+  vec<int> asInt(ArrayLit* al);
 
+  /// information from the analysis of FlatZinc model 
+  std::vector<Id*> _indepVars; // vector of indepent variables 
+  std::map<Id*, Expression*> _alias; // map variable id to its alias (IntLit or BoolLit or another variable)
+  std::map<Id*, std::set<Call*> > _argsToConstraint; // map variable id to the list of constraint that has the variable as arguments
+  std::map<Call*, int> _constraintArgNr; // map experssion pointer to the number of unique variables that it depends on
+  std::map<Id*, std::string> _variableName; // map variable id to variable name in the MiniZinc Model 
+
+  std::map<Id*, Monotonicity> _variableMono; // map variable id to its monotonicity 
+  std::map<Id*, bool> _variableSensitive; // map variable id to its sensitivity  
+
+  // MiniZinc to Id pointers conversion 
+  geas::intvar asIntVarDom(Expression* e, bool dominating);
+  vec<geas::intvar> asIntVarDom(ArrayLit* al, bool dominating);
+  geas::patom_t asBoolVarDom(Expression* e, bool dominating);
+  vec<geas::patom_t> asBoolVarDom(ArrayLit* al, bool dominating);
+
+  void createVar(geas::solver& s, VarDecl* vd); 
+
+  // MiniZinc to value conversions 
+  Id* resolveVarId(Expression* e);
+  Id* asVarId(Expression* e);
+  std::vector<Id*> asVarId(ArrayLit* al);
+
+  // utilities 
+  void replaceCallAlias(Call* c); 
+  void replaceArrayAlias(ArrayLit* c); 
+  std::set<Id*> getArguments(Call* c);
+
+  IdMap<VarId> _variableMap0, _variableMap1; // map variable id to variable instance 
+  std::vector<geas::intvar> _sensvar; // sensitive variable which makes the objective strictly better
+  Id* _objVar; 
   // TODO: create only when necessary or use Geas internal
   geas::intvar zero;
-
 protected:
   geas::solver _solver;
   Model* _flat;
 
+  Preprocessor _constraintPreprocessor;
+  DomPoster _domPoster; 
+
+  geas::solver * _domsolver;
   SolveI::SolveType _objType = SolveI::ST_SAT;
-  std::unique_ptr<GeasTypes::Variable> _objVar;
 
-  GeasTypes::Variable& resolveVar(Expression* e);
-  bool addSolutionNoGood();
+  GeasTypes::Variable& resolveVarDom(Expression* e, bool dominating);
 
-  void registerConstraint(const std::string& name, poster p);
+  void registerConstraint(const std::string& name, analyzer a, poster p, dominator d);
   void registerConstraints();
 };
 
@@ -131,7 +190,7 @@ public:
   std::string getId() override { return "org.minizinc.geas"; }
 
   bool processOption(SolverInstanceBase::Options* opt, int& i, std::vector<std::string>& argv,
-                     const std::string& workingDir = std::string()) override;
+                    const std::string& workingDir = std::string()) override;
   void printHelp(std::ostream& os) override;
 };
 
