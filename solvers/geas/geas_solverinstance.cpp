@@ -29,7 +29,6 @@ void Preprocessor::post(Call* c) {
     ss << "Error: preprocessor cannot handle constraint: " << c->id();
     throw InternalError(ss.str());
   }
-  std::cout << it->first << std::endl;
   return it->second(_base, c);
 }
 
