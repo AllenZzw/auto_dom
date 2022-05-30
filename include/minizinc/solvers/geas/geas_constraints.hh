@@ -39,10 +39,10 @@ PosterImpl(p_int_ne_reif);
 PosterImpl(p_int_le_reif);
 PosterImpl(p_int_lt_reif);
 
-AnalyzerImpl(a_int_eql); 
-AnalyzerImpl(a_int_let);  
-AnalyzerImpl(a_int_eql_reif); 
-AnalyzerImpl(a_int_let_reif); 
+AnalyzerImpl(a_eql); 
+AnalyzerImpl(a_let);  
+AnalyzerImpl(a_eql_reif); 
+AnalyzerImpl(a_let_reif); 
 
 DominanceImpl(d_int_eql); 
 DominanceImpl(d_int_let); 
@@ -101,13 +101,10 @@ PosterImpl(p_bool_ne_reif);
 PosterImpl(p_bool_le_reif);
 PosterImpl(p_bool_lt_reif);
 
-AnalyzerImpl(a_bool_eql);
-AnalyzerImpl(a_bool_let);
-AnalyzerImpl(a_bool_eql_reif);
-
 DominanceImpl(d_bool_eql);
 DominanceImpl(d_bool_let);
-DominanceImpl(d_bool_eq_reif);
+DominanceImpl(d_bool_eql_reif);
+DominanceImpl(d_bool_let_reif);
 
 /* Boolean Arithmetic Constraints */
 PosterImpl(p_bool_or);

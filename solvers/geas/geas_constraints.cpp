@@ -308,50 +308,63 @@ void p_bool_eq_reif(SolverInstanceBase& s, const Call* call) {
   }
 }
 
-// void p_bool_ne_reif(SolverInstanceBase& s, const Call* call) {
-//   if (PAR(2)) {
-//     if (BOOL(2)) {
-//       p_bool_ne(s, call);
-//     } else {
-//       p_bool_eq(s, call);
-//     }
-//   } else {
-//     geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(0), BOOLVAR(1));
-//     geas::add_clause(SD, BOOLVAR(2), BOOLVAR(0), ~BOOLVAR(1));
-//     geas::add_clause(SD, ~BOOLVAR(2), BOOLVAR(0), BOOLVAR(1));
-//     geas::add_clause(SD, ~BOOLVAR(2), ~BOOLVAR(0), ~BOOLVAR(1));
-//   }
-// }
+void p_bool_ne_reif(SolverInstanceBase& s, const Call* call) {
+  if (PAR(2)) {
+    if (BOOL(2)) {
+      p_bool_ne(s, call);
+    } else {
+      p_bool_eq(s, call);
+    }
+  } else {
+    geas::add_clause(SD, BOOLVAR0(2), ~BOOLVAR0(0), BOOLVAR0(1));
+    geas::add_clause(SD, BOOLVAR0(2), BOOLVAR0(0), ~BOOLVAR0(1));
+    geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(0), BOOLVAR0(1));
+    geas::add_clause(SD, ~BOOLVAR0(2), ~BOOLVAR0(0), ~BOOLVAR0(1));
 
-// void p_bool_le_reif(SolverInstanceBase& s, const Call* call) {
-//   if (PAR(2)) {
-//     if (BOOL(2)) {
-//       p_bool_le(s, call);
-//     } else {
-//       auto* nc = new Call(Location().introduce(), call->id(), {call->arg(1), call->arg(0)});
-//       p_bool_lt(s, nc);
-//     }
-//   } else {
-//     geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(1));
-//     geas::add_clause(SD, BOOLVAR(2), BOOLVAR(0));
-//     geas::add_clause(SD, ~BOOLVAR(2), ~BOOLVAR(0), BOOLVAR(1));
-//   }
-// }
+    geas::add_clause(SD, BOOLVAR1(2), ~BOOLVAR1(0), BOOLVAR1(1));
+    geas::add_clause(SD, BOOLVAR1(2), BOOLVAR1(0), ~BOOLVAR1(1));
+    geas::add_clause(SD, ~BOOLVAR1(2), BOOLVAR1(0), BOOLVAR1(1));
+    geas::add_clause(SD, ~BOOLVAR1(2), ~BOOLVAR1(0), ~BOOLVAR1(1));
+  }
+}
 
-// void p_bool_lt_reif(SolverInstanceBase& s, const Call* call) {
-//   if (PAR(2)) {
-//     if (BOOL(2)) {
-//       p_int_lt(s, call);
-//     } else {
-//       auto* nc = new Call(Location().introduce(), call->id(), {call->arg(1), call->arg(0)});
-//       p_int_le(s, nc);
-//     }
-//   } else {
-//     geas::add_clause(SD, ~BOOLVAR(2), ~BOOLVAR(0));
-//     geas::add_clause(SD, ~BOOLVAR(2), BOOLVAR(1));
-//     geas::add_clause(SD, BOOLVAR(2), BOOLVAR(0), ~BOOLVAR(1));
-//   }
-// }
+void p_bool_le_reif(SolverInstanceBase& s, const Call* call) {
+  if (PAR(2)) {
+    if (BOOL(2)) {
+      p_bool_le(s, call);
+    } else {
+      auto* nc = new Call(Location().introduce(), call->id(), {call->arg(1), call->arg(0)});
+      p_bool_lt(s, nc);
+    }
+  } else {
+    geas::add_clause(SD, BOOLVAR0(2), ~BOOLVAR0(1));
+    geas::add_clause(SD, BOOLVAR0(2), BOOLVAR0(0));
+    geas::add_clause(SD, ~BOOLVAR0(2), ~BOOLVAR0(0), BOOLVAR0(1));
+
+    geas::add_clause(SD, BOOLVAR1(2), ~BOOLVAR1(1));
+    geas::add_clause(SD, BOOLVAR1(2), BOOLVAR1(0));
+    geas::add_clause(SD, ~BOOLVAR1(2), ~BOOLVAR1(0), BOOLVAR1(1));
+  }
+}
+
+void p_bool_lt_reif(SolverInstanceBase& s, const Call* call) {
+  if (PAR(2)) {
+    if (BOOL(2)) {
+      p_int_lt(s, call);
+    } else {
+      auto* nc = new Call(Location().introduce(), call->id(), {call->arg(1), call->arg(0)});
+      p_int_le(s, nc);
+    }
+  } else {
+    geas::add_clause(SD, ~BOOLVAR0(2), ~BOOLVAR0(0));
+    geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(1));
+    geas::add_clause(SD, BOOLVAR0(2), BOOLVAR0(0), ~BOOLVAR0(1));
+
+    geas::add_clause(SD, ~BOOLVAR1(2), ~BOOLVAR1(0));
+    geas::add_clause(SD, ~BOOLVAR1(2), BOOLVAR1(1));
+    geas::add_clause(SD, BOOLVAR1(2), BOOLVAR1(0), ~BOOLVAR1(1));
+  }
+}
 
 // void p_bool_or(SolverInstanceBase& s, const Call* call) {
 //   geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(0));
@@ -736,7 +749,7 @@ void a_set_in(SolverInstanceBase& s, Call* call) {
 }
 
 /* constraint analyzer implementation */ 
-void a_int_eql(SolverInstanceBase& s, Call* call) { 
+void a_eql(SolverInstanceBase& s, Call* call) { 
   FUNCTIONNOTIMPLEMENT;
   Id* var0 = VARID(0); 
   Id* var1 = VARID(1); 
@@ -746,29 +759,29 @@ void a_int_eql(SolverInstanceBase& s, Call* call) {
     SI._variableMono[var1] = VAR_EQL; 
 }
 
-void a_int_get(SolverInstanceBase& s, Call* call) {
+void a_get(SolverInstanceBase& s, Call* call) {
   FUNCTIONNOTIMPLEMENT;
   Id* var0 = VARID(0); 
   Id* var1 = VARID(1); 
-  if ( var0 != nullptr )
-    mono_inc(SI._variableMono[var0], VAR_DEC); 
-  if ( var1 != nullptr )
-    mono_dec(SI._variableMono[var1], VAR_DEC); 
+  if (var0 != nullptr) 
+    SI._variableMono[var0] = VAR_INC; 
+  if (var1 != nullptr) 
+    SI._variableMono[var1] = VAR_DEC; 
 }
 
-void a_int_let(SolverInstanceBase& s, Call* call) {
+void a_let(SolverInstanceBase& s, Call* call) {
   FUNCTIONNOTIMPLEMENT;
   Id* var0 = VARID(0); 
   Id* var1 = VARID(1); 
-  if ( var0 != nullptr )
-    mono_dec(SI._variableMono[var0], VAR_DEC); 
-  if ( var1 != nullptr )
-    mono_inc(SI._variableMono[var1], VAR_DEC); 
+  if (var0 != nullptr) 
+    SI._variableMono[var0] = VAR_DEC; 
+  if (var1 != nullptr) 
+    SI._variableMono[var1] = VAR_INC; 
 }
 
-void a_int_eql_reif(SolverInstanceBase& s, Call* call) { 
+void a_eql_reif(SolverInstanceBase& s, Call* call) { 
   if (PAR(2)) 
-    a_int_eql(s, call); 
+    a_eql(s, call); 
   else {
     if (!call->ann().containsCall(std::string("defines_var")) && VARID(2) != nullptr) 
       SI._variableMono[VARID(2)] = VAR_EQL; 
@@ -777,12 +790,12 @@ void a_int_eql_reif(SolverInstanceBase& s, Call* call) {
   }
 }
 
-void a_int_let_reif(SolverInstanceBase& s, Call* call) {
+void a_let_reif(SolverInstanceBase& s, Call* call) {
   if (PAR(2)) {
     if (BOOL(2)) 
-      a_int_let(s, call); 
+      a_let(s, call); 
     else 
-      a_int_get(s, call); 
+      a_get(s, call); 
   }
   else if (!PAR(2) && call->ann().containsCall(std::string("defines_var"))) {
     Id* var0 = VARID(0); 
@@ -918,37 +931,6 @@ void a_int_lin_eql_reif(SolverInstanceBase& s, Call* call) {
   for (unsigned int i = 0; i != vars.size(); i++) {
     if (vars[i] != nullptr)
       SI._variableMono[vars[i]] = VAR_EQL; 
-  }
-}
-
-void a_bool_eql(SolverInstanceBase& s, Call* call) {
-  FUNCTIONNOTIMPLEMENT;
-  Id* var0 = VARID(0); 
-  Id* var1 = VARID(1); 
-  if (var0 != nullptr) 
-    SI._variableMono[var0] = VAR_EQL; 
-  if (var1 != nullptr) 
-    SI._variableMono[var1] = VAR_EQL; 
-}
-
-void a_bool_let(SolverInstanceBase& s, Call* call) {
-  FUNCTIONNOTIMPLEMENT;
-  Id* var0 = VARID(0); 
-  Id* var1 = VARID(1); 
-  if (var0 != nullptr) 
-    SI._variableMono[var0] = VAR_DEC; 
-  if (var1 != nullptr) 
-    SI._variableMono[var1] = VAR_INC; 
-}
-
-void a_bool_eql_reif(SolverInstanceBase& s, Call* call) {
-  if (PAR(2))
-    a_bool_eql(s, call);
-  else {
-    if (!call->ann().containsCall(std::string("defines_var")) && VARID(2) != nullptr) 
-      SI._variableMono[VARID(2)] = VAR_EQL; 
-    if (VARID(0) != nullptr) SI._variableMono[VARID(0)] = VAR_EQL; 
-    if (VARID(1) != nullptr) SI._variableMono[VARID(1)] = VAR_EQL; 
   }
 }
 
@@ -1159,16 +1141,23 @@ void d_int_let_reif(SolverInstanceBase& s, const Call* call, const std::unordere
     else 
       d_int_get(s, call, fixedVars); 
   } else if (!PAR(2) && call->ann().containsCall(std::string("defines_var"))) {
+    Monotonicity mono = SI._variableMono[SI.asVarId(call->ann().getCall(std::string("defines_var"))->arg(0))]; 
     if (VARID(0) == nullptr || VARID(1) == nullptr) // if there is only one variable, throw exception 
       throw InternalError(std::string("no dominance condition for unary functional constraint: ") + std::string(call->id().c_str()) ); 
     else {
       // if there are two variable and only one is fixed, enforce ≤ or ≥
-      if (fixedVars.find(VARID(0)) != fixedVars.end()) 
-        geas::int_le(SD, SI.asIntVarDom(VARID(0), true), SI.asIntVarDom(VARID(0), false), 0); 
-      else if (fixedVars.find(VARID(1)) != fixedVars.end())
-        geas::int_le(SD, SI.asIntVarDom(VARID(1), false), SI.asIntVarDom(VARID(1), true), 0); 
-      else 
-        throw InternalError(std::string("no fixed variable in dominance condition for constraint: ") + std::string(call->id().c_str()) ); 
+      if (fixedVars.find(VARID(0)) != fixedVars.end() && fixedVars.find(VARID(1)) == fixedVars.end()) {
+        if (mono == VAR_DEC) 
+          geas::int_le(SD, SI.asIntVarDom(VARID(0), false), SI.asIntVarDom(VARID(0), true), 0); 
+        else 
+          geas::int_le(SD, SI.asIntVarDom(VARID(0), true), SI.asIntVarDom(VARID(0), false), 0); 
+      } else if (fixedVars.find(VARID(1)) != fixedVars.end() && fixedVars.find(VARID(0)) == fixedVars.end()) {
+        if (mono == VAR_DEC) 
+          geas::int_le(SD, SI.asIntVarDom(VARID(1), true), SI.asIntVarDom(VARID(1), false), 0); 
+        else 
+          geas::int_le(SD, SI.asIntVarDom(VARID(1), false), SI.asIntVarDom(VARID(1), true), 0); 
+      } else 
+        throw InternalError(std::string("Unknown structure for constraint: ") + std::string(call->id().c_str()) ); 
     }
   } else if (!PAR(2) && !call->ann().containsCall(std::string("defines_var"))) {
     // enforce all equal constraint for all input parameters 
@@ -1182,7 +1171,6 @@ void d_int_let_reif(SolverInstanceBase& s, const Call* call, const std::unordere
     }
   } else 
     throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
-  
 }
 
 // x op y = b, there are three cases: 1) x is an int; 2) y is an int; 3) x, y are int vars
@@ -1396,12 +1384,26 @@ void d_bool_eql(SolverInstanceBase& s, const Call* call, const std::unordered_se
 void d_bool_let(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   FUNCTIONNOTIMPLEMENT; 
   Id* x = VARID(0); 
-  if (x == nullptr || fixedVars.find(x) == fixedVars.end())
+  if (x != nullptr && fixedVars.find(x) == fixedVars.end()) 
+    geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false)); 
+  else {
     x = VARID(1);
-  geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false)); 
+    geas::add_clause(SD, SI.asBoolVarDom(x, false), ~SI.asBoolVarDom(x, true)); 
+  }
 }
 
-void d_bool_eq_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+void d_bool_get(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  FUNCTIONNOTIMPLEMENT; 
+  Id* x = VARID(0); 
+  if (x != nullptr && fixedVars.find(x) == fixedVars.end()) 
+    geas::add_clause(SD, SI.asBoolVarDom(x, false), ~SI.asBoolVarDom(x, true)); 
+  else {
+    x = VARID(1);
+    geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false)); 
+  }
+}
+
+void d_bool_eql_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   if (PAR(2)) {
       d_bool_eql(s, call, fixedVars);
   } else {
@@ -1418,6 +1420,48 @@ void d_bool_eq_reif(SolverInstanceBase& s, const Call* call, const std::unordere
       geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(2));
     }
   }
+}
+
+void d_bool_let_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  if (PAR(2)) {
+    if (BOOL(2)) 
+      d_int_let(s, call, fixedVars); 
+    else 
+      d_int_get(s, call, fixedVars); 
+  } else if (!PAR(2) && call->ann().containsCall(std::string("defines_var"))) {
+    Monotonicity mono = SI._variableMono[SI.asVarId(call->ann().getCall(std::string("defines_var"))->arg(0))]; 
+    if (VARID(0) == nullptr || VARID(1) == nullptr) // if there is only one variable, throw exception 
+      throw InternalError(std::string("no dominance condition for unary functional constraint: ") + std::string(call->id().c_str()) ); 
+    else {
+      if (fixedVars.find(VARID(0)) != fixedVars.end() && fixedVars.find(VARID(1)) == fixedVars.end()) {
+        if (mono == VAR_DEC) 
+          geas::add_clause(SD, SI.asBoolVarDom(VARID(0), true), ~SI.asBoolVarDom(VARID(0), false)); 
+        else 
+          geas::add_clause(SD, SI.asBoolVarDom(VARID(0), false), ~SI.asBoolVarDom(VARID(0), true)); 
+      } else if (fixedVars.find(VARID(1)) != fixedVars.end() && fixedVars.find(VARID(0)) == fixedVars.end()) {
+        if (mono == VAR_DEC) 
+          geas::add_clause(SD, ~SI.asBoolVarDom(VARID(1), true), SI.asBoolVarDom(VARID(1), false)); 
+        else 
+          geas::add_clause(SD, ~SI.asBoolVarDom(VARID(1), false), SI.asBoolVarDom(VARID(1), true)); 
+      } else 
+        throw InternalError(std::string("Unknown structure for constraint: ") + std::string(call->id().c_str()) ); 
+    }
+  } else if (!PAR(2) && !call->ann().containsCall(std::string("defines_var"))) {
+    // enforce all equal constraint for all input parameters 
+    if (VARID(0) != nullptr && fixedVars.find(VARID(0)) != fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(0), true), ~SI.asBoolVarDom(VARID(0), false));
+      geas::add_clause(SD, ~SI.asBoolVarDom(VARID(0), true), SI.asBoolVarDom(VARID(0), false)); 
+    }
+    if (VARID(1) != nullptr && fixedVars.find(VARID(1)) != fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(1), true), ~SI.asBoolVarDom(VARID(1), false));
+      geas::add_clause(SD, ~SI.asBoolVarDom(VARID(1), true), SI.asBoolVarDom(VARID(1), false)); 
+    }
+    if (VARID(2) != nullptr && fixedVars.find(VARID(2)) != fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(2), true), ~SI.asBoolVarDom(VARID(2), false));
+      geas::add_clause(SD, ~SI.asBoolVarDom(VARID(2), true), SI.asBoolVarDom(VARID(2), false)); 
+    }
+  } else 
+    throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
 }
 
 void d_bool_clause(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
