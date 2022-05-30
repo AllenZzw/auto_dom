@@ -265,24 +265,29 @@ void p_bool_ne(SolverInstanceBase& s, const Call* call) {
   }
 }
 
-// void p_bool_le(SolverInstanceBase& s, const Call* call) {
-//   if (PAR(0)) {
-//     if (BOOL(0)) {
-//       SOL.post(BOOLVAR(1));
-//     }
-//   } else if (PAR(1)) {
-//     if (!BOOL(1)) {
-//       SOL.post(~BOOLVAR(0));
-//     }
-//   } else {
-//     geas::add_clause(SD, ~BOOLVAR(0), BOOLVAR(1));
-//   }
-// }
+void p_bool_le(SolverInstanceBase& s, const Call* call) {
+  if (PAR(0)) {
+    if (BOOL(0)) {
+      SOL.post(BOOLVAR0(1));
+      SOL.post(BOOLVAR1(1));
+    }
+  } else if (PAR(1)) {
+    if (!BOOL(1)) {
+      SOL.post(~BOOLVAR0(0));
+      SOL.post(~BOOLVAR1(0));
+    }
+  } else {
+    geas::add_clause(SD, ~BOOLVAR0(0), BOOLVAR0(1));
+    geas::add_clause(SD, ~BOOLVAR1(0), BOOLVAR1(1));
+  }
+}
 
-// void p_bool_lt(SolverInstanceBase& s, const Call* call) {
-//   SOL.post(~BOOLVAR(0));
-//   SOL.post(BOOLVAR(1));
-// }
+void p_bool_lt(SolverInstanceBase& s, const Call* call) {
+  SOL.post(~BOOLVAR0(0));
+  SOL.post(BOOLVAR0(1));
+  SOL.post(~BOOLVAR1(0));
+  SOL.post(BOOLVAR1(1));
+}
 
 void p_bool_eq_reif(SolverInstanceBase& s, const Call* call) {
   if (PAR(2)) {
@@ -926,13 +931,24 @@ void a_bool_eql(SolverInstanceBase& s, Call* call) {
     SI._variableMono[var1] = VAR_EQL; 
 }
 
-void a_bool_eq_reif(SolverInstanceBase& s, Call* call) {
+void a_bool_let(SolverInstanceBase& s, Call* call) {
+  FUNCTIONNOTIMPLEMENT;
+  Id* var0 = VARID(0); 
+  Id* var1 = VARID(1); 
+  if (var0 != nullptr) 
+    SI._variableMono[var0] = VAR_DEC; 
+  if (var1 != nullptr) 
+    SI._variableMono[var1] = VAR_INC; 
+}
+
+void a_bool_eql_reif(SolverInstanceBase& s, Call* call) {
   if (PAR(2))
     a_bool_eql(s, call);
   else {
+    if (!call->ann().containsCall(std::string("defines_var")) && VARID(2) != nullptr) 
+      SI._variableMono[VARID(2)] = VAR_EQL; 
     if (VARID(0) != nullptr) SI._variableMono[VARID(0)] = VAR_EQL; 
     if (VARID(1) != nullptr) SI._variableMono[VARID(1)] = VAR_EQL; 
-    if (VARID(2) != nullptr) SI._variableMono[VARID(2)] = VAR_EQL; 
   }
 }
 
@@ -1375,6 +1391,14 @@ void d_bool_eql(SolverInstanceBase& s, const Call* call, const std::unordered_se
     x = VARID(1);
   geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false));
   geas::add_clause(SD, ~SI.asBoolVarDom(x, true), SI.asBoolVarDom(x, false)); 
+}
+
+void d_bool_let(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  FUNCTIONNOTIMPLEMENT; 
+  Id* x = VARID(0); 
+  if (x == nullptr || fixedVars.find(x) == fixedVars.end())
+    x = VARID(1);
+  geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false)); 
 }
 
 void d_bool_eq_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {

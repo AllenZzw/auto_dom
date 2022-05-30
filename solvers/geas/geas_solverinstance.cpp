@@ -94,20 +94,20 @@ void GeasSolverInstance::registerConstraints() {
   registerConstraint("int_lin_ne_reif", GeasConstraints::a_int_lin_eql_reif, GeasConstraints::p_int_lin_ne_reif, GeasConstraints::d_int_lin_eql_reif);
   registerConstraint("int_lin_le_reif", GeasConstraints::a_int_lin_le_reif, GeasConstraints::p_int_lin_le_reif, GeasConstraints::d_int_lin_le_reif);
 
-  /* Boolean Comparison Constraints */
+  /* Boolean Comparison Constraints todo: handle Boolean reification constraint */ 
   registerConstraint("bool_eq", GeasConstraints::a_bool_eql, GeasConstraints::p_bool_eq, GeasConstraints::d_bool_eql);
   registerConstraint("bool_ne", GeasConstraints::a_bool_eql, GeasConstraints::p_bool_ne, GeasConstraints::d_bool_eql);
-  // registerConstraint("bool_le", GeasConstraints::p_bool_le);
-  // registerConstraint("bool_lt", GeasConstraints::p_bool_lt);
-  registerConstraint("bool_eq_reif", GeasConstraints::a_bool_eq_reif, GeasConstraints::p_bool_eq_reif, GeasConstraints::d_bool_eq_reif);
-  // registerConstraint("bool_ne_reif", GeasConstraints::p_bool_ne_reif);
-  // registerConstraint("bool_le_reif", GeasConstraints::p_bool_le_reif);
-  // registerConstraint("bool_lt_reif", GeasConstraints::p_bool_lt_reif);
+  registerConstraint("bool_le", GeasConstraints::a_bool_let, GeasConstraints::p_bool_le, GeasConstraints::d_bool_let);
+  registerConstraint("bool_lt", GeasConstraints::a_bool_let, GeasConstraints::p_bool_lt, GeasConstraints::d_bool_let);
+  registerConstraint("bool_eq_reif", GeasConstraints::a_bool_eql_reif, GeasConstraints::p_bool_eq_reif, GeasConstraints::d_bool_eq_reif);
+  // registerConstraint("bool_ne_reif", GeasConstraints::a_bool_eql_reif, GeasConstraints::p_bool_ne_reif, GeasConstraints::d_bool_eq_reif);
+  // registerConstraint("bool_le_reif", GeasConstraints::a_bool_let_reif, GeasConstraints::p_bool_let_reif, GeasConstraints::d_bool_let_reif);
+  // registerConstraint("bool_lt_reif", GeasConstraints::a_bool_let_reif, GeasConstraints::p_bool_let_reif, GeasConstraints::d_bool_let_reif);
 
-  // /* Boolean Arithmetic Constraints */
-  // registerConstraint("bool_or", GeasConstraints::p_bool_or);
-  // registerConstraint("bool_and", GeasConstraints::p_bool_and);
-  // registerConstraint("bool_xor", GeasConstraints::p_bool_xor);
+  /* Boolean Arithmetic Constraints todo: handle Boolean arithmetic */ 
+  // registerConstraint("bool_or", GeasConstraints::a_bool_not, GeasConstraints::p_bool_or, GeasConstraints::d_bool_or);
+  // registerConstraint("bool_and", GeasConstraints::a_bool_and, GeasConstraints::p_bool_and, GeasConstraints::d_bool_and);
+  // registerConstraint("bool_xor", GeasConstraints::a_bool_xor, GeasConstraints::p_bool_xor, GeasConstraints::d_bool_xor);
   registerConstraint("bool_not", GeasConstraints::a_bool_not, GeasConstraints::p_bool_not, GeasConstraints::d_no_dominance);
   
   registerConstraint("bool_clause", GeasConstraints::a_bool_clause, GeasConstraints::p_bool_clause, GeasConstraints::d_bool_clause);
@@ -115,7 +115,7 @@ void GeasSolverInstance::registerConstraints() {
   registerConstraint("array_bool_and", GeasConstraints::a_array_bool_and_or, GeasConstraints::p_array_bool_and, GeasConstraints::d_array_bool_or);
   registerConstraint("bool_clause_reif", GeasConstraints::a_bool_clause_reif, GeasConstraints::p_bool_clause_reif, GeasConstraints::d_bool_clause_reif);
 
-  // /* Boolean Linear Constraints */
+  // /* Boolean Linear Constraints todo: handle Boolean linear constraints */
   // registerConstraint("bool_lin_eq", GeasConstraints::p_bool_lin_eq);
   // registerConstraint("bool_lin_ne", GeasConstraints::p_bool_lin_ne);
   // registerConstraint("bool_lin_le", GeasConstraints::p_bool_lin_le);
@@ -135,10 +135,6 @@ void GeasSolverInstance::registerConstraints() {
   registerConstraint("alldifferent_except_0", GeasConstraints::a_all_different, GeasConstraints::p_all_different_except_0, GeasConstraints::d_all_different);
   registerConstraint("array_int_minimum", GeasConstraints::a_array_int_min_max, GeasConstraints::p_array_int_minimum, GeasConstraints::d_array_int_minimum);
   registerConstraint("array_int_maximum", GeasConstraints::a_array_int_min_max, GeasConstraints::p_array_int_maximum, GeasConstraints::d_array_int_maximum);
-  // registerConstraint("cumulative", GeasConstraints::p_cumulative);
-  // registerConstraint("cumulative_var", GeasConstraints::p_cumulative);
-  // registerConstraint("disjunctive", GeasConstraints::p_disjunctive);
-  // registerConstraint("disjunctive_var", GeasConstraints::p_disjunctive);
   registerConstraint("table_int", GeasConstraints::a_table_int, GeasConstraints::p_table_int, GeasConstraints::d_table_int);
 }
 

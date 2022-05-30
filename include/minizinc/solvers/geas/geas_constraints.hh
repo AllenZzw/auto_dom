@@ -102,9 +102,11 @@ PosterImpl(p_bool_le_reif);
 PosterImpl(p_bool_lt_reif);
 
 AnalyzerImpl(a_bool_eql);
-AnalyzerImpl(a_bool_eq_reif);
+AnalyzerImpl(a_bool_let);
+AnalyzerImpl(a_bool_eql_reif);
 
 DominanceImpl(d_bool_eql);
+DominanceImpl(d_bool_let);
 DominanceImpl(d_bool_eq_reif);
 
 /* Boolean Arithmetic Constraints */
