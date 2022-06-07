@@ -57,8 +57,8 @@ PosterImpl(p_int_max);
 PosterImpl(p_int_min);
 
 AnalyzerImpl(a_int_abs); 
-AnalyzerImpl(a_int_times_div); 
-AnalyzerImpl(a_int_min_max); 
+AnalyzerImpl(a_eql_binary_op); 
+AnalyzerImpl(a_inc_binary_op); 
 
 DominanceImpl(d_int_binary_op); 
 
@@ -72,18 +72,18 @@ PosterImpl(p_int_lin_le_imp);
 PosterImpl(p_int_lin_eq_reif);
 PosterImpl(p_int_lin_ne_reif);
 PosterImpl(p_int_lin_le_reif);
-AnalyzerImpl(a_int_lin_eq);
-AnalyzerImpl(a_int_lin_ne);
-AnalyzerImpl(a_int_lin_le);
-AnalyzerImpl(a_int_lin_eql_reif);
-// AnalyzerImpl(a_int_lin_le_imp);
-AnalyzerImpl(a_int_lin_le_reif);
+AnalyzerImpl(a_lin_eq);
+AnalyzerImpl(a_lin_ne);
+AnalyzerImpl(a_lin_le);
+AnalyzerImpl(a_lin_eql_reif);
+// AnalyzerImpl(a_lin_le_imp);
+AnalyzerImpl(a_lin_le_reif);
 
 DominanceImpl(d_int_lin_eq); 
 DominanceImpl(d_int_lin_eql); 
 DominanceImpl(d_int_lin_le);
 DominanceImpl(d_int_lin_eql_reif);
-// DominanceImpl(a_int_lin_le_imp);
+// DominanceImpl(a_lin_le_imp);
 DominanceImpl(d_int_lin_le_reif);
 
 
@@ -115,6 +115,8 @@ PosterImpl(p_bool_or_imp);
 PosterImpl(p_bool_and_imp);
 PosterImpl(p_bool_xor_imp);
 
+DominanceImpl(d_bool_binary_op); 
+
 PosterImpl(p_bool_clause);
 PosterImpl(p_array_bool_or);
 PosterImpl(p_array_bool_and);
@@ -123,22 +125,10 @@ PosterImpl(p_array_bool_or_imp);
 PosterImpl(p_array_bool_and_imp);
 PosterImpl(p_bool_clause_reif);
 
-// AnalyzerImpl(p_bool_or);
-// AnalyzerImpl(p_bool_and);
-// AnalyzerImpl(p_bool_xor);
 AnalyzerImpl(a_bool_not);
-// AnalyzerImpl(p_bool_or_imp);
-// AnalyzerImpl(p_bool_and_imp);
-// AnalyzerImpl(p_bool_xor_imp);
-
 AnalyzerImpl(a_bool_clause);
 AnalyzerImpl(a_array_bool_and_or);
 AnalyzerImpl(a_bool_clause_reif);
-
-// DominanceImpl(p_bool_or);
-// DominanceImpl(p_bool_and);
-// DominanceImpl(p_bool_xor);
-// DominanceImpl(p_bool_not);
 
 DominanceImpl(d_bool_clause);
 DominanceImpl(d_array_bool_and);
@@ -156,6 +146,12 @@ PosterImpl(p_bool_lin_lt_imp);
 PosterImpl(p_bool_lin_eq_reif);
 PosterImpl(p_bool_lin_ne_reif);
 PosterImpl(p_bool_lin_le_reif);
+
+DominanceImpl(d_bool_lin_eq); 
+DominanceImpl(d_bool_lin_eql); 
+DominanceImpl(d_bool_lin_le);
+DominanceImpl(d_bool_lin_eql_reif);
+DominanceImpl(d_bool_lin_le_reif);
 
 /* Coercion Constraints */
 PosterImpl(p_bool2int);

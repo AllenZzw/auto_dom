@@ -81,18 +81,18 @@ void GeasSolverInstance::registerConstraints() {
 
   /* Integer Arithmetic Constraints */
   registerConstraint("int_abs", GeasConstraints::a_int_abs, GeasConstraints::p_int_abs, GeasConstraints::d_no_dominance);
-  registerConstraint("int_times", GeasConstraints::a_int_times_div, GeasConstraints::p_int_times, GeasConstraints::d_int_binary_op);
-  registerConstraint("int_div", GeasConstraints::a_int_times_div, GeasConstraints::p_int_div, GeasConstraints::d_int_binary_op);
-  registerConstraint("int_min", GeasConstraints::a_int_min_max, GeasConstraints::p_int_min, GeasConstraints::d_int_binary_op);
-  registerConstraint("int_max", GeasConstraints::a_int_min_max, GeasConstraints::p_int_max, GeasConstraints::d_int_binary_op);
+  registerConstraint("int_times", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_times, GeasConstraints::d_int_binary_op);
+  registerConstraint("int_div", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_div, GeasConstraints::d_int_binary_op);
+  registerConstraint("int_min", GeasConstraints::a_inc_binary_op, GeasConstraints::p_int_min, GeasConstraints::d_int_binary_op);
+  registerConstraint("int_max", GeasConstraints::a_inc_binary_op, GeasConstraints::p_int_max, GeasConstraints::d_int_binary_op);
 
   /* Integer Linear Constraints */
-  registerConstraint("int_lin_eq", GeasConstraints::a_int_lin_eq, GeasConstraints::p_int_lin_eq, GeasConstraints::d_int_lin_eq);
-  registerConstraint("int_lin_ne", GeasConstraints::a_int_lin_ne, GeasConstraints::p_int_lin_ne, GeasConstraints::d_int_lin_eql);
-  registerConstraint("int_lin_le", GeasConstraints::a_int_lin_le, GeasConstraints::p_int_lin_le, GeasConstraints::d_int_lin_le);
-  registerConstraint("int_lin_eq_reif", GeasConstraints::a_int_lin_eql_reif, GeasConstraints::p_int_lin_eq_reif, GeasConstraints::d_int_lin_eql_reif);
-  registerConstraint("int_lin_ne_reif", GeasConstraints::a_int_lin_eql_reif, GeasConstraints::p_int_lin_ne_reif, GeasConstraints::d_int_lin_eql_reif);
-  registerConstraint("int_lin_le_reif", GeasConstraints::a_int_lin_le_reif, GeasConstraints::p_int_lin_le_reif, GeasConstraints::d_int_lin_le_reif);
+  registerConstraint("int_lin_eq", GeasConstraints::a_lin_eq, GeasConstraints::p_int_lin_eq, GeasConstraints::d_int_lin_eq);
+  registerConstraint("int_lin_ne", GeasConstraints::a_lin_ne, GeasConstraints::p_int_lin_ne, GeasConstraints::d_int_lin_eql);
+  registerConstraint("int_lin_le", GeasConstraints::a_lin_le, GeasConstraints::p_int_lin_le, GeasConstraints::d_int_lin_le);
+  registerConstraint("int_lin_eq_reif", GeasConstraints::a_lin_eql_reif, GeasConstraints::p_int_lin_eq_reif, GeasConstraints::d_int_lin_eql_reif);
+  registerConstraint("int_lin_ne_reif", GeasConstraints::a_lin_eql_reif, GeasConstraints::p_int_lin_ne_reif, GeasConstraints::d_int_lin_eql_reif);
+  registerConstraint("int_lin_le_reif", GeasConstraints::a_lin_le_reif, GeasConstraints::p_int_lin_le_reif, GeasConstraints::d_int_lin_le_reif);
 
   /* Boolean Comparison Constraints todo: handle Boolean reification constraint */ 
   registerConstraint("bool_eq", GeasConstraints::a_eql, GeasConstraints::p_bool_eq, GeasConstraints::d_bool_eql);
@@ -105,9 +105,9 @@ void GeasSolverInstance::registerConstraints() {
   registerConstraint("bool_lt_reif", GeasConstraints::a_let_reif, GeasConstraints::p_bool_lt_reif, GeasConstraints::d_bool_let_reif);
 
   /* Boolean Arithmetic Constraints todo: handle Boolean arithmetic */ 
-  // registerConstraint("bool_or", GeasConstraints::a_bool_not, GeasConstraints::p_bool_or, GeasConstraints::d_bool_or);
-  // registerConstraint("bool_and", GeasConstraints::a_bool_and, GeasConstraints::p_bool_and, GeasConstraints::d_bool_and);
-  // registerConstraint("bool_xor", GeasConstraints::a_bool_xor, GeasConstraints::p_bool_xor, GeasConstraints::d_bool_xor);
+  registerConstraint("bool_or", GeasConstraints::a_inc_binary_op, GeasConstraints::p_bool_or, GeasConstraints::d_bool_binary_op);
+  registerConstraint("bool_and", GeasConstraints::a_inc_binary_op, GeasConstraints::p_bool_and, GeasConstraints::d_bool_binary_op);
+  registerConstraint("bool_xor", GeasConstraints::a_eql_binary_op, GeasConstraints::p_bool_xor, GeasConstraints::d_bool_binary_op);
   registerConstraint("bool_not", GeasConstraints::a_bool_not, GeasConstraints::p_bool_not, GeasConstraints::d_no_dominance);
   
   registerConstraint("bool_clause", GeasConstraints::a_bool_clause, GeasConstraints::p_bool_clause, GeasConstraints::d_bool_clause);
@@ -116,12 +116,12 @@ void GeasSolverInstance::registerConstraints() {
   registerConstraint("bool_clause_reif", GeasConstraints::a_bool_clause_reif, GeasConstraints::p_bool_clause_reif, GeasConstraints::d_bool_clause_reif);
 
   // /* Boolean Linear Constraints todo: handle Boolean linear constraints */
-  // registerConstraint("bool_lin_eq", GeasConstraints::p_bool_lin_eq);
-  // registerConstraint("bool_lin_ne", GeasConstraints::p_bool_lin_ne);
-  // registerConstraint("bool_lin_le", GeasConstraints::p_bool_lin_le);
-  // registerConstraint("bool_lin_eq_reif", GeasConstraints::p_bool_lin_eq_reif);
-  // registerConstraint("bool_lin_ne_reif", GeasConstraints::p_bool_lin_ne_reif);
-  // registerConstraint("bool_lin_le_reif", GeasConstraints::p_bool_lin_le_reif);
+  registerConstraint("bool_lin_eq", GeasConstraints::a_lin_eq, GeasConstraints::p_bool_lin_eq, GeasConstraints::d_bool_lin_eq);
+  registerConstraint("bool_lin_ne", GeasConstraints::a_lin_ne, GeasConstraints::p_bool_lin_ne, GeasConstraints::d_bool_lin_eql);
+  registerConstraint("bool_lin_le", GeasConstraints::a_lin_le, GeasConstraints::p_bool_lin_le, GeasConstraints::d_bool_lin_le);
+  registerConstraint("bool_lin_eq_reif", GeasConstraints::a_lin_eql_reif, GeasConstraints::p_bool_lin_eq_reif, GeasConstraints::d_bool_lin_eql_reif);
+  registerConstraint("bool_lin_ne_reif", GeasConstraints::a_lin_eql_reif, GeasConstraints::p_bool_lin_ne_reif, GeasConstraints::d_bool_lin_eql_reif);
+  registerConstraint("bool_lin_le_reif", GeasConstraints::a_lin_le_reif, GeasConstraints::p_bool_lin_le_reif, GeasConstraints::d_bool_lin_le_reif);
 
   /* Coercion Constraints */
   registerConstraint("bool2int", GeasConstraints::a_bool2int, GeasConstraints::p_bool2int, GeasConstraints::d_no_dominance);

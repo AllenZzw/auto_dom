@@ -366,25 +366,33 @@ void p_bool_lt_reif(SolverInstanceBase& s, const Call* call) {
   }
 }
 
-// void p_bool_or(SolverInstanceBase& s, const Call* call) {
-//   geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(0));
-//   geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(1));
-//   geas::add_clause(SD, ~BOOLVAR(2), BOOLVAR(0), BOOLVAR(1));
-// }
+void p_bool_or(SolverInstanceBase& s, const Call* call) {
+  geas::add_clause(SD, BOOLVAR0(2), ~BOOLVAR0(0));
+  geas::add_clause(SD, BOOLVAR0(2), ~BOOLVAR0(1));
+  geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(0), BOOLVAR0(1));
 
-// void p_bool_and(SolverInstanceBase& s, const Call* call) {
-//   geas::add_clause(SD, ~BOOLVAR(2), BOOLVAR(0));
-//   geas::add_clause(SD, ~BOOLVAR(2), BOOLVAR(1));
-//   geas::add_clause(SD, BOOLVAR(2), ~BOOLVAR(0), ~BOOLVAR(1));
-// }
+  geas::add_clause(SD, BOOLVAR1(2), ~BOOLVAR1(0));
+  geas::add_clause(SD, BOOLVAR1(2), ~BOOLVAR1(1));
+  geas::add_clause(SD, ~BOOLVAR1(2), BOOLVAR1(0), BOOLVAR1(1));
+}
 
-// void p_bool_xor(SolverInstanceBase& s, const Call* call) {
-//   if (call->argCount() == 2) {
-//     p_bool_ne(s, call);
-//   } else {
-//     p_bool_ne_reif(s, call);
-//   }
-// }
+void p_bool_and(SolverInstanceBase& s, const Call* call) {
+  geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(0));
+  geas::add_clause(SD, ~BOOLVAR0(2), BOOLVAR0(1));
+  geas::add_clause(SD, BOOLVAR0(2), ~BOOLVAR0(0), ~BOOLVAR0(1));
+
+  geas::add_clause(SD, ~BOOLVAR1(2), BOOLVAR1(0));
+  geas::add_clause(SD, ~BOOLVAR1(2), BOOLVAR1(1));
+  geas::add_clause(SD, BOOLVAR1(2), ~BOOLVAR1(0), ~BOOLVAR1(1));
+}
+
+void p_bool_xor(SolverInstanceBase& s, const Call* call) {
+  if (call->argCount() == 2) {
+    p_bool_ne(s, call);
+  } else {
+    p_bool_ne_reif(s, call);
+  }
+}
 
 void p_bool_not(SolverInstanceBase& s, const Call* call) { p_bool_ne(s, call); }
 
@@ -465,71 +473,71 @@ void p_bool_clause_reif(SolverInstanceBase& s, const Call* call) {
   geas::add_clause(*SD, cl1);
 }
 
-// void p_bool_lin_eq(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   // TODO: Rewrite using MiniZinc Library??
-//   geas::bool_linear_le(SD, geas::at_True, SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars, -INT(2));
-// }
+void p_bool_lin_eq(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_le(SD, geas::at_True, SI.zero, cons, vars0, -INT(2));
+  geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars0, -INT(2));
 
-// void p_bool_lin_ne(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   geas::bool_linear_ne(SD, cons, vars, INT(2));
-// }
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_le(SD, geas::at_True, SI.zero, cons, vars1, -INT(2));
+  geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars1, -INT(2));
+}
 
-// void p_bool_lin_le(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars, -INT(2));
-// }
+void p_bool_lin_ne(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ne(SD, cons, vars0, INT(2));
 
-// void p_bool_lin_eq_imp(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   // TODO: Rewrite using MiniZinc Library??
-//   geas::bool_linear_le(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_ge(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-// }
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ne(SD, cons, vars1, INT(2));
+}
 
-// void p_bool_lin_ne_imp(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   geas::bool_linear_ne(SD, cons, vars, INT(2), BOOLVAR(3));
-// }
+void p_bool_lin_le(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars0, -INT(2));
 
-// void p_bool_lin_le_imp(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   geas::bool_linear_ge(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-// }
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ge(SD, geas::at_True, SI.zero, cons, vars1, -INT(2));
+}
 
-// void p_bool_lin_eq_reif(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   // TODO: Rewrite using MiniZinc Library??
-//   geas::bool_linear_le(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_ge(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_ne(SD, cons, vars, INT(2), ~BOOLVAR(3));
-// }
+void p_bool_lin_eq_reif(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_le(SD, BOOLVAR0(3), SI.zero, cons, vars0, -INT(2));
+  geas::bool_linear_ge(SD, BOOLVAR0(3), SI.zero, cons, vars0, -INT(2));
+  geas::bool_linear_ne(SD, cons, vars0, INT(2), ~BOOLVAR0(3));
 
-// void p_bool_lin_ne_reif(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   // TODO: Rewrite using MiniZinc Library??
-//   geas::bool_linear_ne(SD, cons, vars, INT(2), BOOLVAR(3));
-//   geas::bool_linear_le(SD, ~BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_ge(SD, ~BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-// }
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_le(SD, BOOLVAR1(3), SI.zero, cons, vars1, -INT(2));
+  geas::bool_linear_ge(SD, BOOLVAR1(3), SI.zero, cons, vars1, -INT(2));
+  geas::bool_linear_ne(SD, cons, vars1, INT(2), ~BOOLVAR1(3));
+}
 
-// void p_bool_lin_le_reif(SolverInstanceBase& s, const Call* call) {
-//   vec<int> cons = INTARRAY(0);
-//   vec<geas::patom_t> vars = BOOLVARARRAY(1);
-//   // TODO: Rewrite using MiniZinc Library??
-//   geas::bool_linear_ge(SD, BOOLVAR(3), SI.zero, cons, vars, -INT(2));
-//   geas::bool_linear_le(SD, ~BOOLVAR(3), SI.zero, cons, vars, -INT(2) - 1);
-// }
+void p_bool_lin_ne_reif(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ne(SD, cons, vars0, INT(2), BOOLVAR0(3));
+  geas::bool_linear_le(SD, ~BOOLVAR0(3), SI.zero, cons, vars0, -INT(2));
+  geas::bool_linear_ge(SD, ~BOOLVAR0(3), SI.zero, cons, vars0, -INT(2));
+
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), false);
+  geas::bool_linear_ne(SD, cons, vars0, INT(2), BOOLVAR1(3));
+  geas::bool_linear_le(SD, ~BOOLVAR1(3), SI.zero, cons, vars1, -INT(2));
+  geas::bool_linear_ge(SD, ~BOOLVAR1(3), SI.zero, cons, vars1, -INT(2));
+}
+
+void p_bool_lin_le_reif(SolverInstanceBase& s, const Call* call) {
+  vec<int> cons = INTARRAY(0);
+  vec<geas::patom_t> vars0 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ge(SD, BOOLVAR0(3), SI.zero, cons, vars0, -INT(2));
+  geas::bool_linear_le(SD, ~BOOLVAR0(3), SI.zero, cons, vars0, -INT(2) - 1);
+
+  vec<geas::patom_t> vars1 = SI.asBoolVarDom(ARRAY(1), true);
+  geas::bool_linear_ge(SD, BOOLVAR1(3), SI.zero, cons, vars1, -INT(2));
+  geas::bool_linear_le(SD, ~BOOLVAR1(3), SI.zero, cons, vars1, -INT(2) - 1);
+}
 
 void p_bool2int(SolverInstanceBase& s, const Call* call) {
   CONSTRAINTNOTIMPLEMENT; 
@@ -816,7 +824,7 @@ void a_int_abs(SolverInstanceBase& s, Call* call) {
 }
 
 // todo: inspect the domain of variables to determine the monotonicity for arguments of int_tims/int_div
-void a_int_times_div(SolverInstanceBase& s, Call* call) {
+void a_eql_binary_op(SolverInstanceBase& s, Call* call) {
   CONSTRAINTNOTIMPLEMENT; 
   if (VARID(0) != nullptr)
     SI._variableMono[VARID(0)] = VAR_EQL; 
@@ -824,7 +832,7 @@ void a_int_times_div(SolverInstanceBase& s, Call* call) {
     SI._variableMono[VARID(1)] = VAR_EQL;  
 }
 
-void a_int_min_max(SolverInstanceBase& s, Call* call) {
+void a_inc_binary_op(SolverInstanceBase& s, Call* call) {
   if ( call->ann().containsCall(std::string("defines_var")) ) {
     if ( VARID(0) != nullptr )
       mono_inc(SI._variableMono[VARID(0)], CONTEXT); 
@@ -840,7 +848,7 @@ void a_int_min_max(SolverInstanceBase& s, Call* call) {
   }
 }
 
-void a_int_lin_eq(SolverInstanceBase& s, Call* call) {
+void a_lin_eq(SolverInstanceBase& s, Call* call) {
   if ( call->ann().containsCall(std::string("defines_var")) ) {
     // defines a variable 
     Id* defVar = SI.asVarId(call->ann().getCall(std::string("defines_var"))->arg(0)); 
@@ -873,7 +881,7 @@ void a_int_lin_eq(SolverInstanceBase& s, Call* call) {
   }
 }
 
-void a_int_lin_ne(SolverInstanceBase& s, Call* call) {
+void a_lin_ne(SolverInstanceBase& s, Call* call) {
   FUNCTIONNOTIMPLEMENT; 
   std::vector<Id*> vars = VARIDARRAY(1); 
   for (unsigned int i = 0; i != vars.size(); i++) {
@@ -882,7 +890,7 @@ void a_int_lin_ne(SolverInstanceBase& s, Call* call) {
   }
 }
 
-void a_int_lin_le(SolverInstanceBase& s, Call* call) {
+void a_lin_le(SolverInstanceBase& s, Call* call) {
   FUNCTIONNOTIMPLEMENT; 
   vec<int> cons = INTARRAY(0);
   std::vector<Id*> vars = VARIDARRAY(1);
@@ -897,11 +905,11 @@ void a_int_lin_le(SolverInstanceBase& s, Call* call) {
   }
 }
 
-void a_int_lin_le_reif(SolverInstanceBase& s, Call* call) {
+void a_lin_le_reif(SolverInstanceBase& s, Call* call) {
   if (PAR(3) && BOOL(3))
-    a_int_lin_le(s, call); 
+    a_lin_le(s, call); 
   else if (PAR(3) && !BOOL(3))
-    a_int_lin_ne(s, call); 
+    a_lin_ne(s, call); 
   else if (!PAR(3) && call->ann().containsCall(std::string("defines_var")) ) {
     vec<int> cons = INTARRAY(0);
     std::vector<Id*> vars = VARIDARRAY(1);
@@ -924,7 +932,7 @@ void a_int_lin_le_reif(SolverInstanceBase& s, Call* call) {
     throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
 }
 
-void a_int_lin_eql_reif(SolverInstanceBase& s, Call* call) {
+void a_lin_eql_reif(SolverInstanceBase& s, Call* call) {
   CONSTRAINTNOTIMPLEMENT; 
   std::vector<Id*> vars = VARIDARRAY(1);
   assert(cons.size() == vars.size());
@@ -1333,7 +1341,14 @@ void d_int_lin_le(SolverInstanceBase& s, const Call* call, const std::unordered_
 
   SI._sensvar.push_back(sum0);
   SI._sensvar.push_back(sum1);
+}
 
+void d_int_lin_eql_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  CONSTRAINTNOTIMPLEMENT; 
+  geas::intvar v0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
+  geas::intvar v1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
+  int_lin_partial_sum(s, call, fixedVars, v0, v1); 
+  geas::int_eq(SD, v0, v1);
 }
 
 void d_int_lin_le_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
@@ -1362,14 +1377,6 @@ void d_int_lin_le_reif(SolverInstanceBase& s, const Call* call, const std::unord
       geas::int_eq(SD, v0, v1); 
   } else 
     throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
-}
-
-void d_int_lin_eql_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
-  CONSTRAINTNOTIMPLEMENT; 
-  geas::intvar v0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
-  geas::intvar v1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
-  int_lin_partial_sum(s, call, fixedVars, v0, v1); 
-  geas::int_eq(SD, v0, v1);
 }
 
 void d_bool_eql(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
@@ -1462,6 +1469,36 @@ void d_bool_let_reif(SolverInstanceBase& s, const Call* call, const std::unorder
     }
   } else 
     throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
+}
+
+// x op y = b, there are three cases: 1) x is a bool; 2) y is a bool; 3) x, y are bool vars
+void d_bool_binary_op(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  if ( call->ann().containsCall(std::string("defines_var")) ) {
+    Id* x = VARID(0); 
+    if (x == nullptr || fixedVars.find(x) == fixedVars.end()) 
+      x = VARID(1);
+    if (SI._variableMono[x] == VAR_INC) 
+      geas::add_clause(SD, SI.asBoolVarDom(x, false), ~SI.asBoolVarDom(x, true));
+    else if (SI._variableMono[x] == VAR_DEC) 
+      geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false));
+    else {
+      geas::add_clause(SD, SI.asBoolVarDom(x, false), ~SI.asBoolVarDom(x, true));
+      geas::add_clause(SD, SI.asBoolVarDom(x, true), ~SI.asBoolVarDom(x, false));
+    }
+  } else {
+    if (VARID(0) == nullptr || fixedVars.find(VARID(0)) == fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(0), false), ~SI.asBoolVarDom(VARID(0), true));
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(0), true), ~SI.asBoolVarDom(VARID(0), false));
+    }
+    if (VARID(1) == nullptr || fixedVars.find(VARID(1)) == fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(1), false), ~SI.asBoolVarDom(VARID(1), true));
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(1), true), ~SI.asBoolVarDom(VARID(1), false));
+    }
+    if (VARID(2) == nullptr || fixedVars.find(VARID(2)) == fixedVars.end()) {
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(2), false), ~SI.asBoolVarDom(VARID(2), true));
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(2), true), ~SI.asBoolVarDom(VARID(2), false));
+    }
+  }
 }
 
 void d_bool_clause(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
@@ -1649,16 +1686,44 @@ void d_bool_clause_reif(SolverInstanceBase& s, const Call* call, const std::unor
     geas::add_clause(SD, ~bv0, bv1);
 }
 
+// todo: implement the dominance condition for boolean linear constraints 
+void d_bool_lin_eq_func(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  
+}
+
+void d_bool_lin_eq(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  if (call->ann().containsCall(std::string("defines_var"))) 
+    d_bool_lin_eq_func(s, call, fixedVars); 
+  else 
+    d_bool_lin_eql(s, call, fixedVars); 
+}
+
+void d_bool_lin_eql(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  FUNCTIONNOTIMPLEMENT; 
+  
+}
+
+void d_bool_lin_le(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  FUNCTIONNOTIMPLEMENT; 
+  
+}
+
+void d_bool_lin_eql_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  CONSTRAINTNOTIMPLEMENT; 
+  
+}
+
+void d_bool_lin_le_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  
+}
+
 void d_no_dominance(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   throw InternalError(std::string("no dominance condition for unary functional constraint: ") + std::string(call->id().c_str()) ); 
 }
 
 void d_all_different(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   FUNCTIONNOTIMPLEMENT; 
-  std::string id = std::string(call->id().c_str()); 
-  bool excludeZero = false; 
-  if (id == "alldifferent_except_0" || id == "geas_alldifferent_except_0")
-    excludeZero = true; 
+  bool excludeZero = (std::string(call->id().c_str()) == "all_different_except_0" || std::string(call->id().c_str()) == "dom_all_different_except_0");
   
   std::vector<Id*> args; 
   std::vector<Id*> vars = VARIDARRAY(0);
