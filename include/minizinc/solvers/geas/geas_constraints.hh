@@ -182,6 +182,7 @@ AnalyzerImpl(a_array_int_min_max);
 AnalyzerImpl(a_table_int);
 
 DominanceImpl(d_all_different);
+DominanceImpl(d_all_different_except_0);
 DominanceImpl(d_array_int_minimum);
 DominanceImpl(d_array_int_maximum);
 DominanceImpl(d_table_int);

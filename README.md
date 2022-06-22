@@ -67,4 +67,13 @@ constraint x[2] != 1 \/ x[10] != 0;
 ...
 ```
 
-More details can be found in our paper. 
+More details can be found in the follwing paper:
+```
+@inproceedings{jlee2022exploiting,
+	title={Exploiting Functional Constraints in Generating Dominance Breaking Nogoods for Constraint Optimization},
+	author={Jimmy H.M. Lee and Allen Z. Zhong},
+	booktitle={Proceedings of the 28th International Conference on Principles and Practice of Constraint Programming},
+	year={2022},
+  	organization={Schloss Dagstuhl-Leibniz-Zentrum f{\"u}r Informatik}
+}
+```

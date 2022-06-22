@@ -82,6 +82,9 @@ void GeasSolverInstance::registerConstraints() {
   /* Integer Arithmetic Constraints */
   registerConstraint("int_abs", GeasConstraints::a_int_abs, GeasConstraints::p_int_abs, GeasConstraints::d_no_dominance);
   registerConstraint("int_times", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_times, GeasConstraints::d_int_binary_op);
+  // registerConstraint("int_pow", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_pow, GeasConstraints::d_int_binary_op);
+  // registerConstraint("int_plus", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_plus, GeasConstraints::d_int_binary_op);
+  // registerConstraint("int_mod", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_mod, GeasConstraints::d_int_binary_op);
   registerConstraint("int_div", GeasConstraints::a_eql_binary_op, GeasConstraints::p_int_div, GeasConstraints::d_int_binary_op);
   registerConstraint("int_min", GeasConstraints::a_inc_binary_op, GeasConstraints::p_int_min, GeasConstraints::d_int_binary_op);
   registerConstraint("int_max", GeasConstraints::a_inc_binary_op, GeasConstraints::p_int_max, GeasConstraints::d_int_binary_op);
@@ -112,11 +115,11 @@ void GeasSolverInstance::registerConstraints() {
   
   registerConstraint("bool_clause", GeasConstraints::a_bool_clause, GeasConstraints::p_bool_clause, GeasConstraints::d_bool_clause);
   registerConstraint("array_bool_or", GeasConstraints::a_array_bool_and_or, GeasConstraints::p_array_bool_or, GeasConstraints::d_array_bool_or);
-  registerConstraint("array_bool_and", GeasConstraints::a_array_bool_and_or, GeasConstraints::p_array_bool_and, GeasConstraints::d_array_bool_or);
+  registerConstraint("array_bool_and", GeasConstraints::a_array_bool_and_or, GeasConstraints::p_array_bool_and, GeasConstraints::d_array_bool_and);
   registerConstraint("bool_clause_reif", GeasConstraints::a_bool_clause_reif, GeasConstraints::p_bool_clause_reif, GeasConstraints::d_bool_clause_reif);
 
   // /* Boolean Linear Constraints todo: handle Boolean linear constraints */
-  registerConstraint("bool_lin_eq", GeasConstraints::a_lin_eq, GeasConstraints::p_bool_lin_eq, GeasConstraints::d_bool_lin_eq);
+  registerConstraint("bool_lin_eq", GeasConstraints::a_lin_eq, GeasConstraints::p_bool_lin_eq, GeasConstraints::d_bool_lin_eql);
   registerConstraint("bool_lin_ne", GeasConstraints::a_lin_ne, GeasConstraints::p_bool_lin_ne, GeasConstraints::d_bool_lin_eql);
   registerConstraint("bool_lin_le", GeasConstraints::a_lin_le, GeasConstraints::p_bool_lin_le, GeasConstraints::d_bool_lin_le);
   registerConstraint("bool_lin_eq_reif", GeasConstraints::a_lin_eql_reif, GeasConstraints::p_bool_lin_eq_reif, GeasConstraints::d_bool_lin_eql_reif);
@@ -129,10 +132,12 @@ void GeasSolverInstance::registerConstraints() {
   /* Element Constraints */
   registerConstraint("array_int_element", GeasConstraints::a_array_lit_element, GeasConstraints::p_array_int_element, GeasConstraints::d_no_dominance);
   registerConstraint("array_bool_element", GeasConstraints::a_array_lit_element, GeasConstraints::p_array_bool_element, GeasConstraints::d_no_dominance);
-  
+  // registerConstraint("array_var_int_element", GeasConstraints::a_array_lit_element, GeasConstraints::p_array_var_int_element, GeasConstraints::d_var_int_element);
+  // registerConstraint("array_var_bool_element", GeasConstraints::a_array_lit_element, GeasConstraints::p_array_var_bool_element, GeasConstraints::d_var_bool_element);
+
   // /* Global Constraints */
   registerConstraint("all_different_int", GeasConstraints::a_all_different, GeasConstraints::p_all_different, GeasConstraints::d_all_different);
-  registerConstraint("all_different_except_0", GeasConstraints::a_all_different, GeasConstraints::p_all_different_except_0, GeasConstraints::d_all_different);
+  registerConstraint("all_different_except_0", GeasConstraints::a_all_different, GeasConstraints::p_all_different_except_0, GeasConstraints::d_all_different_except_0);
   registerConstraint("array_int_minimum", GeasConstraints::a_array_int_min_max, GeasConstraints::p_array_int_minimum, GeasConstraints::d_array_int_minimum);
   registerConstraint("array_int_maximum", GeasConstraints::a_array_int_min_max, GeasConstraints::p_array_int_maximum, GeasConstraints::d_array_int_maximum);
   registerConstraint("table_int", GeasConstraints::a_table_int, GeasConstraints::p_table_int, GeasConstraints::d_table_int);
@@ -576,6 +581,15 @@ SolverInstanceBase::Status MiniZinc::GeasSolverInstance::solve() {
           geas::int_le(_domsolver->data, x[l], y[l], 0, b[l]); 
       }
 
+      // common assignment elimination 
+      // {
+      //   for (unsigned int i=0; i!=srcVars.size(); i++) {
+      //     GeasVariable& var0 = resolveVarDom(follow_id_to_decl(srcVars[i]), true); 
+      //     GeasVariable& var1 = resolveVarDom(follow_id_to_decl(srcVars[i]), false); 
+      //     geas::int_ne(_domsolver->data, var0.intVar(), var1.intVar()); 
+      //   }
+      // }
+
       // solve and store the dominance breaking nogoods 
       geas::solver::result res = geas::solver::SAT;
       int solutionNr = 0; 
@@ -642,6 +656,7 @@ SolverInstanceBase::Status MiniZinc::GeasSolverInstance::solve() {
           //     std::cout << (solution.value(geas_var.boolVar())?"true":"false");
           //   else 
           //     std::cout << solution[geas_var.intVar()]; 
+          //   std::cout << "(" << _variableMono[id] << ")" << ","; 
           // } 
           // std::cout << std::endl; 
           
@@ -653,6 +668,7 @@ SolverInstanceBase::Status MiniZinc::GeasSolverInstance::solve() {
           //     std::cout << (solution.value(geas_var.boolVar())?"true":"false");
           //   else 
           //     std::cout << solution[geas_var.intVar()]; 
+          //   std::cout << "(" << _variableMono[id] << ")" << ","; 
           // } 
           // std::cout << std::endl; 
           

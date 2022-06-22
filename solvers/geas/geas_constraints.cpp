@@ -725,7 +725,6 @@ void p_set_in(SolverInstanceBase& s, const Call* call) {
 }
 
 // analyzer for variables' monotonicity (whether increment or decrement is prefer)
-// todo: factor out the analyzer to solver_instance_base
 void mono_inc(Monotonicity &child_mono, const Monotonicity &parent_mono)
 {
   if (child_mono == VAR_NONE) 
@@ -898,9 +897,9 @@ void a_lin_le(SolverInstanceBase& s, Call* call) {
   for (unsigned int i = 0; i != vars.size(); i++) {
     if (vars[i] != nullptr) {
       if (cons[i] > 0)
-        mono_dec(SI._variableMono[vars[i]], VAR_DEC); 
+        SI._variableMono[vars[i]] = VAR_DEC; 
       else if (cons[i] < 0)
-        mono_inc(SI._variableMono[vars[i]], VAR_DEC); 
+        SI._variableMono[vars[i]] = VAR_INC; 
     }
   }
 }
@@ -985,6 +984,16 @@ void a_array_bool_and_or(SolverInstanceBase& s, Call* call) {
   for (unsigned int i = 0; i != arr.size(); i++) {
     if (arr[i] != nullptr) 
       mono_inc(SI._variableMono[arr[i]], context0); 
+  }
+}
+
+void a_array_bool_xor(SolverInstanceBase& s, Call* call) {
+  FUNCTIONNOTIMPLEMENT; 
+  std::vector<Id*> vars = VARIDARRAY(0);
+  for (unsigned int i = 0; i != vars.size(); i++) {
+    if (vars[i] != nullptr) {
+      SI._variableMono[vars[i]] = VAR_EQL; 
+    }
   }
 }
 
@@ -1153,14 +1162,14 @@ void d_int_let_reif(SolverInstanceBase& s, const Call* call, const std::unordere
     if (VARID(0) == nullptr || VARID(1) == nullptr) // if there is only one variable, throw exception 
       throw InternalError(std::string("no dominance condition for unary functional constraint: ") + std::string(call->id().c_str()) ); 
     else {
-      // if there are two variable and only one is fixed, enforce ≤ or ≥
+      // if there are two variables and only one is fixed, enforce ≤ or ≥
       if (fixedVars.find(VARID(0)) != fixedVars.end() && fixedVars.find(VARID(1)) == fixedVars.end()) {
         if (mono == VAR_DEC) 
           geas::int_le(SD, SI.asIntVarDom(VARID(0), false), SI.asIntVarDom(VARID(0), true), 0); 
         else 
           geas::int_le(SD, SI.asIntVarDom(VARID(0), true), SI.asIntVarDom(VARID(0), false), 0); 
       } else if (fixedVars.find(VARID(1)) != fixedVars.end() && fixedVars.find(VARID(0)) == fixedVars.end()) {
-        if (mono == VAR_DEC) 
+        if (mono == VAR_DEC)
           geas::int_le(SD, SI.asIntVarDom(VARID(1), true), SI.asIntVarDom(VARID(1), false), 0); 
         else 
           geas::int_le(SD, SI.asIntVarDom(VARID(1), false), SI.asIntVarDom(VARID(1), true), 0); 
@@ -1181,7 +1190,7 @@ void d_int_let_reif(SolverInstanceBase& s, const Call* call, const std::unordere
     throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
 }
 
-// x op y = b, there are three cases: 1) x is an int; 2) y is an int; 3) x, y are int vars
+// x op y = z, there are three cases: 1) x is an int; 2) y is an int; 3) x, y are int vars
 void d_int_binary_op(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   if ( call->ann().containsCall(std::string("defines_var")) ) {
     Id* x = VARID(0); 
@@ -1687,34 +1696,125 @@ void d_bool_clause_reif(SolverInstanceBase& s, const Call* call, const std::unor
 }
 
 // todo: implement the dominance condition for boolean linear constraints 
-void d_bool_lin_eq_func(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
-  
-}
+void bool_lin_partial_sum(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars, geas::intvar& sum0, geas::intvar& sum1) {
+  vec<int> cons = INTARRAY(0);
+  std::vector<Id*> varIds = VARIDARRAY(1);
+  assert(varIds.size() == cons.size()); 
+  vec<geas::patom_t> vars0, vars1; 
+  vec<int> parcons; 
+  for (unsigned int i = 0; i != varIds.size(); i++) {
+    if (varIds[i] != nullptr && fixedVars.find(varIds[i]) != fixedVars.end()) {
+      vars0.push(SI.asBoolVarDom(varIds[i], true)); 
+      vars1.push(SI.asBoolVarDom(varIds[i], false)); 
+      parcons.push(cons[i]);
+    }
+  }
 
-void d_bool_lin_eq(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
-  if (call->ann().containsCall(std::string("defines_var"))) 
-    d_bool_lin_eq_func(s, call, fixedVars); 
-  else 
-    d_bool_lin_eql(s, call, fixedVars); 
+  geas::bool_linear_le(SD, geas::at_True, sum0, parcons, vars0, 0);
+  geas::bool_linear_ge(SD, geas::at_True, sum0, parcons, vars0, 0);
+  geas::bool_linear_le(SD, geas::at_True, sum1, parcons, vars1, 0);
+  geas::bool_linear_ge(SD, geas::at_True, sum1, parcons, vars1, 0); 
 }
 
 void d_bool_lin_eql(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   FUNCTIONNOTIMPLEMENT; 
+  geas::intvar sum0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
+  geas::intvar sum1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
   
+  vec<int> cons = INTARRAY(0);
+  std::vector<Id*> varIds = VARIDARRAY(1);
+  assert(varIds.size() == cons.size()); 
+  vec<geas::patom_t> vars0, vars1; 
+  bool allpos = true, allneg = true; 
+  vec<int> parcons; 
+  for (unsigned int i = 0; i != varIds.size(); i++) {
+    if (varIds[i] != nullptr && fixedVars.find(varIds[i]) != fixedVars.end()) {
+      vars0.push(SI.asBoolVarDom(varIds[i], true)); 
+      vars1.push(SI.asBoolVarDom(varIds[i], false)); 
+      parcons.push(cons[i]);
+      allpos = allpos && (cons[i] >= 0);
+      allneg = allneg && (cons[i] <= 0);
+    }
+  }
+
+  geas::bool_linear_le(SD, geas::at_True, sum0, parcons, vars0, 0);
+  geas::bool_linear_ge(SD, geas::at_True, sum0, parcons, vars0, 0);
+  geas::bool_linear_le(SD, geas::at_True, sum1, parcons, vars1, 0);
+  geas::bool_linear_ge(SD, geas::at_True, sum1, parcons, vars1, 0); 
+  
+  if (allpos) {
+    SOL.post(sum0 <= INT(2)); 
+    SOL.post(sum1 <= INT(2)); 
+  } else if (allneg) {
+    SOL.post(sum0 >= INT(2)); 
+    SOL.post(sum1 >= INT(2)); 
+  }
+  geas::int_eq(SD, sum0, sum1);
 }
 
 void d_bool_lin_le(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   FUNCTIONNOTIMPLEMENT; 
+  vec<int> cons = INTARRAY(0);
+  std::vector<Id*> varIds = VARIDARRAY(1);
+  assert(varIds.size() == cons.size()); 
+  vec<geas::patom_t> vars0, vars1; 
+  bool allpos = true, allneg = true; 
+  vec<int> parcons; 
+  for (unsigned int i = 0; i != varIds.size(); i++) {
+    if (varIds[i] != nullptr && fixedVars.find(varIds[i]) != fixedVars.end()) {
+      vars0.push(SI.asBoolVarDom(varIds[i], true)); 
+      vars1.push(SI.asBoolVarDom(varIds[i], false)); 
+      parcons.push(cons[i]);
+      allpos = allpos && (cons[i] >= 0);
+      allneg = allneg && (cons[i] <= 0);
+    }
+  }
+
+  geas::intvar sum0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
+  geas::intvar sum1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
   
+  geas::bool_linear_ge(SD, geas::at_True, sum0, parcons, vars0, 0);
+  geas::bool_linear_le(SD, geas::at_True, sum1, parcons, vars1, 0);
+  geas::int_le(SD, sum0, sum1, 0); 
+
+  SI._sensvar.push_back(sum0);
+  SI._sensvar.push_back(sum1);
 }
 
 void d_bool_lin_eql_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   CONSTRAINTNOTIMPLEMENT; 
-  
+  geas::intvar v0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
+  geas::intvar v1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
+  bool_lin_partial_sum(s, call, fixedVars, v0, v1); 
+  geas::int_eq(SD, v0, v1);
 }
 
 void d_bool_lin_le_reif(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
-  
+  if (PAR(3) && BOOL(3))
+    d_bool_lin_le(s, call, fixedVars); 
+  else if (PAR(3) && !BOOL(3))
+    d_bool_lin_eql(s, call, fixedVars); 
+  else if (!PAR(3)) {
+    Monotonicity mono = VAR_EQL; 
+    if (call->ann().containsCall(std::string("defines_var")))
+      mono = SI._variableMono[SI.asVarId(call->ann().getCall(std::string("defines_var"))->arg(0))]; 
+    else if ( VARID(3) != nullptr && fixedVars.find(VARID(3)) != fixedVars.end() ) {
+      // enforce equality of boolean variable 
+      geas::add_clause(SD, SI.asBoolVarDom(VARID(3), true), ~SI.asBoolVarDom(VARID(3), false));
+      geas::add_clause(SD, ~SI.asBoolVarDom(VARID(3), true), SI.asBoolVarDom(VARID(3), false)); 
+    }
+    geas::intvar v0 = SOL.new_intvar(SHRT_MIN, SHRT_MAX); 
+    geas::intvar v1 = SOL.new_intvar(SHRT_MIN, SHRT_MAX);
+    bool_lin_partial_sum(s, call, fixedVars, v0, v1); 
+
+    if (mono == VAR_INC)
+      geas::int_le(SD, v0, v1, 0);
+    else if (mono == VAR_DEC)
+      geas::int_le(SD, v1, v0, 0);
+    else if (mono == VAR_EQL)
+      geas::int_eq(SD, v0, v1); 
+  } else 
+    throw InternalError(std::string("Unknown structure for constraint ") + std::string(call->id().c_str()) );
 }
 
 void d_no_dominance(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
@@ -1723,8 +1823,6 @@ void d_no_dominance(SolverInstanceBase& s, const Call* call, const std::unordere
 
 void d_all_different(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
   FUNCTIONNOTIMPLEMENT; 
-  bool excludeZero = (std::string(call->id().c_str()) == "all_different_except_0" || std::string(call->id().c_str()) == "dom_all_different_except_0");
-  
   std::vector<Id*> args; 
   std::vector<Id*> vars = VARIDARRAY(0);
   std::unordered_set<int> vals; 
@@ -1736,7 +1834,46 @@ void d_all_different(SolverInstanceBase& s, const Call* call, const std::unorder
         if (isv->size() >= 1) {
           for (int j = 0; j < isv->size(); ++j)
             for (auto k = isv->min(j).toInt(); k <= isv->max(j).toInt(); ++k)
-              if (!excludeZero || k != 0)
+              vals.insert(static_cast<int>(k)); 
+        }
+      } else
+        args.push_back(vars[i]); 
+    }
+  }
+
+  if (args.size() != 0) {
+    for (auto& val: vals) {
+      geas::intvar c0 = SOL.new_intvar(0,1);
+      geas::intvar c1 = SOL.new_intvar(0,1);
+      vec<int> ks(args.size(), 1); 
+      vec<geas::patom_t> bv0, bv1; 
+      for (auto& id: args) {
+        bv0.push(SI.asIntVarDom(id, true) == val);
+        bv1.push(SI.asIntVarDom(id, false) == val);
+      }
+      geas::bool_linear_le(SD, geas::at_True, c0, ks, bv0, 0); 
+      geas::bool_linear_le(SD, geas::at_True, c1, ks, bv1, 0); 
+      geas::bool_linear_ge(SD, geas::at_True, c0, ks, bv0, 0); 
+      geas::bool_linear_ge(SD, geas::at_True, c1, ks, bv1, 0); 
+      geas::int_le(SD, c0, c1, 0); 
+    }
+  }
+}
+
+void d_all_different_except_0(SolverInstanceBase& s, const Call* call, const std::unordered_set<Id*>& fixedVars) {
+  FUNCTIONNOTIMPLEMENT; 
+  std::vector<Id*> args; 
+  std::vector<Id*> vars = VARIDARRAY(0);
+  std::unordered_set<int> vals; 
+  for (unsigned int i = 0; i != vars.size(); i++) {
+    if (vars[i] != nullptr) {
+      if (fixedVars.find(vars[i]) == fixedVars.end()) {
+        Expression* domain = vars[i]->decl()->ti()->domain(); 
+        IntSetVal* isv = eval_intset(SI.env().envi(), domain);
+        if (isv->size() >= 1) {
+          for (int j = 0; j < isv->size(); ++j)
+            for (auto k = isv->min(j).toInt(); k <= isv->max(j).toInt(); ++k)
+              if (k != 0)
                 vals.insert(static_cast<int>(k)); 
         }
       } else
